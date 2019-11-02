@@ -1,6 +1,16 @@
+#include <iostream>
 #include "BrutalForce.h"
 
 using namespace std;
+
+static int currentMin = -1;
+static int* finalPath = nullptr;
+static int finalCost = INT_MAX;
+
+void swap(int& a, int& b);
+void calculatePath(int* a, int n, int** array);
+void heapPermutation(int* a, int size, int n, int** array);
+int brutalForce(int** array, int width);
 
 void swap(int& a, int& b)
 {
@@ -9,35 +19,14 @@ void swap(int& a, int& b)
 	b = tmp;
 }
 
-//Prints the array 
-void printArr(int *a, int n, int value, int **array)
-{
-	cout << " 0 -> " << a[0] << "   : " << array[0][a[0]] << endl;
-
-	for (int i = 0; i < n-1 ; i++)
-	{
-		cout << " -> " << a[i+1] << "   : " << array[a[i]][a[i + 1]] << endl;
-	}
-
-	cout << " -> 0: " << "   : " << array[a[n - 1]][0] << endl;
-	cout << "sum: " << value << "\n";
-}
-
 void calculatePath(int* a, int n, int** array)
 {
-	static int currentMin = -1;
-
 	int sum = 0;
 
 	sum += array[0][a[0]];
 
 	for (int i = 0; i < n - 1; i++)
 	{
-		//if (array[a[i]][a[i + 1]] == 0)
-		//{
-		//	return;
-		//}
-
 		sum += array[a[i]][a[i + 1]];
 	}
 
@@ -47,10 +36,20 @@ void calculatePath(int* a, int n, int** array)
 	{
 		currentMin = sum;
 
-		printArr(a, n, currentMin, array);
-	}
+		//
+		// Save path.
+		//
 
-	//cout << "sum: " << sum << endl;
+		finalPath[0] = 0;
+		finalPath[n+1] = 0;
+
+		for (int i = 0; i < n; i++)
+			finalPath[i+1] = a[i];
+
+		finalPath[n + 1] = 0;
+
+		finalCost = currentMin;
+	}
 }
 
 // Generating permutation using Heap Algorithm 
@@ -80,9 +79,10 @@ void heapPermutation(int *a, int size, int n, int **array)
 	}
 }
 
-// Driver code 
 int brutalForce(int** array, int width)
 {
+	finalPath = new int[width+1];
+
 	int* path = new int[width-1];
 
 	for (int i = 0; i < width-1; i++)
@@ -91,6 +91,22 @@ int brutalForce(int** array, int width)
 	}
 
 	heapPermutation(path, width - 1, width - 1, array);
+
+	//
+	// Print path;
+	//
+
+	cout << "\nBrutal force:\n\t";
+	for (int i = 0; i < width; i++)
+	{
+		cout << finalPath[i] << " -> ";
+	}
+
+	cout << finalPath[width] << endl;
+	cout << "\tSum: " << finalCost << endl << endl;
+
+	delete[] finalPath;
+	delete[] path;
 
 	return 0;
 }

@@ -25,10 +25,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="BrutalForce.cpp" />
+    <ClCompile Include="DynamicPrograming.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BrutalForce.h" />
+    <ClInclude Include="DynamicPrograming.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

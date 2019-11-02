@@ -4,20 +4,33 @@
 #include <Windows.h>
 
 #include "BrutalForce.h"
+#include "DynamicPrograming.h"
 
 int readGrapgFromFile(std::string path, int**& array, int& width);
 void printArray(int** array, int width);
+void emptyArray(int**& array, int width);
 
 int main()
 {
 	int** array = nullptr;
 	int width;
+	int returnValue;
 
-	readGrapgFromFile("br6.atsp", array, width);
+	returnValue = readGrapgFromFile("br6.atsp", array, width);
+
+	if (returnValue == -1)
+	{
+		std::cout << "Cannot read graph.\n";
+		return -1;
+	}
 
 	printArray(array, width);
 
 	brutalForce(array, width);
+
+	dynamicPrograming(array, width);
+
+	emptyArray(array, width);
 
 }
 
@@ -132,4 +145,16 @@ void printArray(int** array, int width)
 		std::cout << std::endl;
 
 	}
+}
+
+void emptyArray(int**& array, int width)
+{
+	for (int i = 0; i < width; ++i)
+	{
+		delete[] array[i];
+	}
+
+	delete[] array;
+
+	array = nullptr;
 }
