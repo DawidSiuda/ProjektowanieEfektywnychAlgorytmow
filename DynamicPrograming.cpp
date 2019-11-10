@@ -49,7 +49,7 @@ int dynamicPrograming(int** array, int width)
 
 	int sum = 0;
 
-	cout << "\nDynamic Programing:\n\t";
+	cout << "Dynamic Programing:\n\t";
 
 	for (int i = 0; i < width; i++) 
 	{

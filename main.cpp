@@ -2,9 +2,14 @@
 #include <fstream>
 #include <iostream>
 #include <Windows.h>
+#include <chrono> 
+#include <conio.h>
 
 #include "BrutalForce.h"
 #include "DynamicPrograming.h"
+
+using namespace std;
+using namespace std::chrono;
 
 int readGrapgFromFile(std::string path, int**& array, int& width);
 void printArray(int** array, int width);
@@ -15,28 +20,130 @@ int main()
 	int** array = nullptr;
 	int width;
 	int returnValue;
+	int option;
 
-	returnValue = readGrapgFromFile("br6.atsp", array, width);
-
-	if (returnValue == -1)
+	do
 	{
-		std::cout << "Cannot read graph.\n";
-		return -1;
-	}
+		cout << "========================================\n" 
+			<< "MENU\n"
+			<< "1) Wczytaj graf \"graf.txt\"\n"
+			<< "2) Wyswietl graf\n"
+			<< "3) Brute-Force\n"
+			<< "4) Programowanie dynamiczne\n"
+			<< "0) Wyjscie\n";
 
-	printArray(array, width);
+		option = _getch();
 
-	brutalForce(array, width);
+		system("cls");
 
-	dynamicPrograming(array, width);
+		switch (option)
+		{
+			case '0':
+			{
+				if (array != nullptr)
+					emptyArray(array, width);
+				exit(0);
+				break;
+			}
+			case '1':
+			{
+				if (array != nullptr)
+					emptyArray(array, width);
 
-	emptyArray(array, width);
+				returnValue = readGrapgFromFile("graf.txt", array, width);
+
+				if (returnValue == -1)
+				{
+					cout << "ERROR: Cannot read graph.\n";
+				}
+
+				break;
+			}
+			case '2':
+			{
+				if (array != nullptr)
+					printArray(array, width);
+				else
+					cout << "ERROR: No load graph.\n";
+				break;
+			}
+			case '3':
+			{
+				if (array != nullptr)
+					brutalForce(array, width);
+				else
+					cout << "ERROR: No load graph.\n";
+				break;
+			}
+			case '4':
+			{
+				if (array != nullptr)
+					dynamicPrograming(array, width);
+				else
+					cout << "ERROR: No load graph.\n";
+				break;
+			}
+		}
+	} while (1);
+
+
+
+	//printArray(array, width);
+
+
+	//std::cout << "\n\nBrutal Force: edgeNumber, no. time\n";
+
+	//for (int i = 0; i <= 5; i++)
+	//{
+	//	int newWidth = width - 10 + i * 2;
+	//	for (int j = 0; j <= 5; j++)
+	//	{
+	//		auto start = high_resolution_clock::now();
+
+	//		brutalForce(array, newWidth);
+
+	//		auto stop = high_resolution_clock::now();
+
+	//		auto duration = duration_cast<microseconds>(stop - start);`
+
+	//		cout << newWidth << "; " << j << "; " << duration.count() << endl;
+	//	}
+	//}
+
+
+	////brutalForce(array, width);
+
+
+
+	//std::cout << "\n\nDynamic Programing: edgeNumber, no. time\n";
+
+	//for (int i = 0; i <= 5; i++)
+	//{
+	//	int newWidth = width - 10 + i * 2;
+	//	for (int j = 0; j <= 5; j++)
+	//	{
+	//		auto start = high_resolution_clock::now();
+
+	//		//brutalForce(array, newWidth);
+	//		dynamicPrograming(array, newWidth);
+
+	//		auto stop = high_resolution_clock::now();
+
+	//		auto duration = duration_cast<microseconds>(stop - start);
+
+	//		cout << newWidth << "; " << j << "; " << duration.count() << endl;
+	//	}
+	//}
+
+
+	////dynamicPrograming(array, width);
+
+	//emptyArray(array, width);
 
 }
 
 int readGrapgFromFile(std::string path, int**& array, int& width)
 {
-
 	array = nullptr;
 	width = -1;
 
@@ -53,7 +160,6 @@ int readGrapgFromFile(std::string path, int**& array, int& width)
 
 		return -1;
 	}
-
 
 	while (getline(file, line))
 	{

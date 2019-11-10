@@ -96,17 +96,27 @@ int brutalForce(int** array, int width)
 	// Print path;
 	//
 
-	cout << "\nBrutal force:\n\t";
+	cout << "Brute-Force:\n\t";
+
 	for (int i = 0; i < width; i++)
 	{
 		cout << finalPath[i] << " -> ";
 	}
+	cout << finalPath[width];
+	cout << endl;
 
-	cout << finalPath[width] << endl;
 	cout << "\tSum: " << finalCost << endl << endl;
+
+	//
+	// Clear vars;
+	//
 
 	delete[] finalPath;
 	delete[] path;
+
+	currentMin = -1;
+	finalPath = nullptr;
+	finalCost = INT_MAX;
 
 	return 0;
 }
