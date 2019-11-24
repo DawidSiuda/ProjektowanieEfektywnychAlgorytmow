@@ -27,18 +27,19 @@ int dynamicPrograming(int** array, int width)
 	for (int i = 1; i < width; i++) 
 		vector = setBit(vector, i);
 
-	g(0, vector, array, width);
+	int sum2 = g(0, vector, array, width);
 
-	//int sum = 0;
 	int* path = new int[width + 1];
 	path[0] = 0;
 
+	
 	for (int i = 1; getNumberOfOnes(vector) > 0; i++)
 	{
+		int numberOfOnes = getNumberOfOnes(vector);
 		int min = 0;
 		for (int j = 0; j < width; j++)
 		{
-			if (lookupPath[min][vector] > lookupPath[j][vector]) 
+			if (lookupCosts[min][vector] > lookupCosts[j][vector])
 				min = j;
 		}
 
@@ -74,6 +75,8 @@ int g(int vertex, unsigned bitVector, int** array, int width)
 
 	if (getNumberOfOnes(bitVector) == 0)
 	{
+		if (vertex == 1)
+			int a = 6;
 		return array[vertex][0];
 	}
 	else
@@ -83,10 +86,19 @@ int g(int vertex, unsigned bitVector, int** array, int width)
 
 		for (int i = 0; i < width; i++) 
 		{
-			int tmp = isSet(bitVector, i);
-			if (tmp) 
+			int tmp2 = isSet(bitVector, i);
+			if (tmp2) 
 			{
-				int tmp = g(i, resetBit(bitVector, i), array, width) + array[vertex][i];
+				int tmp = g(i, resetBit(bitVector, i), array, width);
+				tmp += array[vertex][i];
+
+				//cout << "======================================================================================================================================================" << endl;
+				//std::cout << "printArray(): Dawid lookupPath.";
+				//printArray(lookupPath);
+
+				//std::cout << "\nprintArray(): Dawid lookupCosts.";
+				//printArray(lookupCosts);
+
 				if (tmp < min) 
 				{
 					min = tmp;

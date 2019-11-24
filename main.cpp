@@ -34,6 +34,7 @@ int main()
 
 		option = _getch();
 
+		
 		system("cls");
 
 		switch (option)
@@ -50,7 +51,20 @@ int main()
 				if (array != nullptr)
 					emptyArray(array, width);
 
-				returnValue = readGrapgFromFile("graf.txt", array, width);
+				//string defaultName("graf.txt");
+				string defaultName("tsp_10b.txt");
+				
+				cout << "File name (" << defaultName <<"): ";
+
+				std::string input;
+				std::getline(std::cin, input);
+
+				if (input.empty()) 
+				{
+					input = defaultName;
+				}
+
+				returnValue = readGrapgFromFile(input, array, width);
 
 				if (returnValue == -1)
 				{
@@ -70,7 +84,13 @@ int main()
 			case '3':
 			{
 				if (array != nullptr)
+				{
+					auto start = high_resolution_clock::now();
 					brutalForce(array, width);
+					auto stop = high_resolution_clock::now();
+					auto duration = duration_cast<microseconds>(stop - start);
+					cout << "Time: " << duration.count() << " microseconds" << endl;
+				}
 				else
 					cout << "ERROR: No load graph.\n";
 				break;
@@ -78,68 +98,19 @@ int main()
 			case '4':
 			{
 				if (array != nullptr)
+				{
+					auto start = high_resolution_clock::now();
 					dynamicPrograming(array, width);
+					auto stop = high_resolution_clock::now();
+					auto duration = duration_cast<microseconds>(stop - start);
+					cout << "Time: " << duration.count() << " microseconds" << endl;
+				}
 				else
 					cout << "ERROR: No load graph.\n";
 				break;
 			}
 		}
 	} while (1);
-
-
-
-	//printArray(array, width);
-
-
-	//std::cout << "\n\nBrutal Force: edgeNumber, no. time\n";
-
-	//for (int i = 0; i <= 5; i++)
-	//{
-	//	int newWidth = width - 10 + i * 2;
-	//	for (int j = 0; j <= 5; j++)
-	//	{
-	//		auto start = high_resolution_clock::now();
-
-	//		brutalForce(array, newWidth);
-
-	//		auto stop = high_resolution_clock::now();
-
-	//		auto duration = duration_cast<microseconds>(stop - start);`
-
-	//		cout << newWidth << "; " << j << "; " << duration.count() << endl;
-	//	}
-	//}
-
-
-	////brutalForce(array, width);
-
-
-
-	//std::cout << "\n\nDynamic Programing: edgeNumber, no. time\n";
-
-	//for (int i = 0; i <= 5; i++)
-	//{
-	//	int newWidth = width - 10 + i * 2;
-	//	for (int j = 0; j <= 5; j++)
-	//	{
-	//		auto start = high_resolution_clock::now();
-
-	//		//brutalForce(array, newWidth);
-	//		dynamicPrograming(array, newWidth);
-
-	//		auto stop = high_resolution_clock::now();
-
-	//		auto duration = duration_cast<microseconds>(stop - start);
-
-	//		cout << newWidth << "; " << j << "; " << duration.count() << endl;
-	//	}
-	//}
-
-
-	////dynamicPrograming(array, width);
-
-	//emptyArray(array, width);
-
 }
 
 int readGrapgFromFile(std::string path, int**& array, int& width)
@@ -161,63 +132,42 @@ int readGrapgFromFile(std::string path, int**& array, int& width)
 		return -1;
 	}
 
-	while (getline(file, line))
+	int isFirstLine = true;
+
+	file >> width;
+
+	std::cout << "Number of cities: " << width << "\n";
+
+	array = new int* [width];
+
+	for (int i = 0; i < width; ++i)
 	{
-		//
-		// search for dimension
-		//
+		array[i] = new int[width];
 
-		if (line.find("DIMENSION:") != std::string::npos)
+		memset(array[i], 0, width * sizeof(int));
+	}
+
+	int row = 0;
+	int collumn = 0;
+	int value;
+
+	while (file >> value)
+	{
+		array[row][collumn] = value;
+
+		collumn++;
+
+		if (collumn == width)
 		{
-			std::cout << "Found DIMENSION parameter in file.\n";
+			collumn = 0;
+			row++;
 
-			temp = line.substr(11, 5);
-
-			width = atoi(temp.c_str());
-
-
-			std::cout << "Number of cities: " << width << "\n";
-
-			array = new int* [width];
-
-			for (int i = 0; i < width; ++i)
+			if (row == width)
 			{
-				array[i] = new int[width];
-
-				memset(array[i], 0, width * sizeof(int));
+				break;
 			}
 		}
-
-		//
-		// Read value from file to graph.
-		//
-
-		if (line.find("EDGE_WEIGHT_SECTION") != std::string::npos)
-		{
-			int row = 0;
-			int collumn = 0;
-			int value;
-
-			while (file >> value)
-			{
-				array[row][collumn] = value;
-
-				collumn++;
-
-				if (collumn == width)
-				{
-					collumn = 0;
-					row++;
-
-					if (row == width)
-					{
-						break;
-					}
-				}
-
-			}
-
-		}
+		
 	}
 
 	file.close();
