@@ -106,6 +106,8 @@ int brutalForce(int** array, int width)
 	cout << endl;
 
 	cout << "\tSum: " << finalCost << endl << endl;
+	//cout << finalCost << "; ";
+
 
 	//
 	// Clear vars;

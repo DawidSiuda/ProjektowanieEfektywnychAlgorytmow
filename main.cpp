@@ -4,9 +4,17 @@
 #include <Windows.h>
 #include <chrono> 
 #include <conio.h>
+#include <sstream>
+#include <iomanip>
+
 
 #include "BrutalForce.h"
 #include "DynamicPrograming.h"
+#include "Annealing.h"
+#include "Genetic.h"
+#include "MyVector.h"
+
+#define NUMBER_OF_TEST 1
 
 using namespace std;
 using namespace std::chrono;
@@ -17,6 +25,8 @@ void emptyArray(int**& array, int width);
 
 int main()
 {
+	srand(time(NULL));
+	
 	int** array = nullptr;
 	int width;
 	int returnValue;
@@ -26,15 +36,16 @@ int main()
 	{
 		cout << "========================================\n" 
 			<< "MENU\n"
-			<< "1) Wczytaj graf \"graf.txt\"\n"
+			<< "1) Wczytaj graf\n"
 			<< "2) Wyswietl graf\n"
 			<< "3) Brute-Force\n"
 			<< "4) Programowanie dynamiczne\n"
+			<< "5) Symulowane wyzarzanie\n"
+			<< "6) Algorytm genetyczny\n"
 			<< "0) Wyjscie\n";
 
 		option = _getch();
 
-		
 		system("cls");
 
 		switch (option)
@@ -52,7 +63,8 @@ int main()
 					emptyArray(array, width);
 
 				//string defaultName("graf.txt");
-				string defaultName("tsp_10b.txt");
+				//string defaultName("tsp_10b.txt");
+				string defaultName("170-2755.txt");
 				
 				cout << "File name (" << defaultName <<"): ";
 
@@ -88,8 +100,8 @@ int main()
 					auto start = high_resolution_clock::now();
 					brutalForce(array, width);
 					auto stop = high_resolution_clock::now();
-					auto duration = duration_cast<microseconds>(stop - start);
-					cout << "Time: " << duration.count() << " microseconds" << endl;
+					auto duration = duration_cast<milliseconds>(stop - start);
+					cout << "Time: " << duration.count() << " milliseconds" << endl;
 				}
 				else
 					cout << "ERROR: No load graph.\n";
@@ -97,16 +109,347 @@ int main()
 			}
 			case '4':
 			{
-				if (array != nullptr)
+				cout << "1) Manual test\n";
+				cout << "2) Automatic test\n";
+
+				option = _getch();
+				switch (option)
 				{
-					auto start = high_resolution_clock::now();
-					dynamicPrograming(array, width);
-					auto stop = high_resolution_clock::now();
-					auto duration = duration_cast<microseconds>(stop - start);
-					cout << "Time: " << duration.count() << " microseconds" << endl;
+					case '1':
+					{
+
+						if (array != nullptr)
+						{
+							auto start = high_resolution_clock::now();
+							dynamicPrograming(array, width);
+							auto stop = high_resolution_clock::now();
+							auto duration = duration_cast<milliseconds>(stop - start);
+							cout << "Time: " << duration.count() << " milliseconds" << endl;
+						}
+						else
+							cout << "ERROR: No load graph.\n";
+						break;
+					}
+					case '2':
+					{
+						const int numberOfFiles = 7;
+						string files[numberOfFiles] = { "6-80.txt",
+														"17-2085.txt",
+														"29-2020.txt",
+														"47-1776.txt",
+														"64-1839.txt",
+														"70-1950.txt",
+														"170-2755.txt" };
+
+						int optimalSolution[numberOfFiles] = { 80, 2085, 2020, 1776, 1839, 1950, 2755 };
+
+						for (int i = 0; i < 2; i++) // Graph size.
+						{
+							int returnValue = readGrapgFromFile(files[i], array, width);
+
+							if (returnValue == -1)
+							{
+								cout << "ERROR: Cannot read graph.\n";
+								return -1;
+							}
+
+							int averageTime = 0;
+							int averageSolution = 0;
+
+							for (int i = 0; i < NUMBER_OF_TEST; i++)
+							{
+								auto start = high_resolution_clock::now();
+								averageSolution += dynamicPrograming(array, width, true);
+								auto stop = high_resolution_clock::now();
+								auto duration = duration_cast<milliseconds>(stop - start);
+								averageTime += duration.count();
+							}
+
+							averageTime /= NUMBER_OF_TEST;
+							averageSolution /= NUMBER_OF_TEST;
+
+							std::cout << std::setw(PRINT_WIDTH) << width << "; ";
+
+							std::cout << std::setw(PRINT_WIDTH) << optimalSolution[i] << "; ";
+
+							std::cout << std::setw(PRINT_WIDTH) << averageTime << "; " << endl;
+						}
+						break;
+					}
 				}
-				else
-					cout << "ERROR: No load graph.\n";
+			}
+			case '5':
+			{
+				cout << "1) Manual test\n";
+				cout << "2) Automatic test\n";
+
+				option = _getch();
+				switch (option)
+				{
+					case '1':
+					{
+						if (array != nullptr)
+						{
+							auto start = high_resolution_clock::now();
+							annealing(array, width, false);
+							auto stop = high_resolution_clock::now();
+							auto duration = duration_cast<milliseconds>(stop - start);
+							cout << "Time: " << duration.count() << " milliseconds" << endl;
+							break;
+						}
+						else
+						{
+							cout << "ERROR: No load graph.\n";
+						}
+					}
+					case '2':
+					{
+						const int numberOfFiles = 7;
+						string files[numberOfFiles] = { "6-80.txt",
+							                            "17-2085.txt",
+														"29-2020.txt",
+														"47-1776.txt",
+														"64-1839.txt",
+														"70-1950.txt",
+														"170-2755.txt" };
+
+						int optimalSolution[numberOfFiles] = { 80, 2085, 2020, 1776, 1839, 1950, 2755};
+
+						cout << std::setw(PRINT_WIDTH + DAW) << "width;"
+							<< std::setw(PRINT_WIDTH + DAW) << "BegTem;"
+							<< std::setw(PRINT_WIDTH + DAW) << "TmpFac;"
+							<< std::setw(PRINT_WIDTH + DAW) << "WAFact;"
+							<< std::setw(PRINT_WIDTH + DAW) << "cost;"
+							<< std::setw(PRINT_WIDTH + DAW) << "optSolu;"
+							<< std::setw(PRINT_WIDTH + DAW) << "time;"
+							<< std::setw(PRINT_WIDTH + DAW) << "blad;" << endl;
+
+						for (int i = 0; i < numberOfFiles; i++) // Graph size.
+						{
+							int returnValue = readGrapgFromFile(files[i], array, width);
+
+							if (returnValue == -1)
+							{
+								cout << "ERROR: Cannot read graph.\n";
+								return -1;
+							}
+
+							double beginTemperature = 500;
+
+							for (double tempChanFactor = 0.99; tempChanFactor <= 0.9999; tempChanFactor = tempChanFactor / 10 + 0.9) // Temperature Change Factor
+							{
+								for (double worseAcceptableFactor = 15; worseAcceptableFactor <=60; worseAcceptableFactor *= 2) // graph size
+								{
+									int averageTime = 0;
+									int averagePopulationCounter = 0;
+									int averageSolution = 0;
+
+									for (int i = 0; i < NUMBER_OF_TEST; i++)
+									{
+										auto start = high_resolution_clock::now();
+										averageSolution += annealing(array, width, true, beginTemperature, tempChanFactor, worseAcceptableFactor);
+										auto stop = high_resolution_clock::now();
+										auto duration = duration_cast<milliseconds>(stop - start);
+										averageTime += duration.count();
+									}
+
+									averageTime /= NUMBER_OF_TEST;
+									averageSolution /= NUMBER_OF_TEST;
+
+									int other = 100 * ((float)averageSolution - (float)optimalSolution[i]) / (float)optimalSolution[i];
+
+									std::cout << std::setw(PRINT_WIDTH) << width << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << beginTemperature << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << tempChanFactor << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << worseAcceptableFactor << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << averageSolution << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << optimalSolution[i] << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << averageTime << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << other << "; " << endl;
+
+								}
+							}
+						}
+						break;
+					}
+				}
+				break;
+			}
+			case '6':
+			{
+				cout << "1) Manual test\n";
+				cout << "2) Automatic test\n";
+
+				option = _getch();
+				switch (option)
+				{
+					case '1':
+					{
+						if (array != nullptr)
+						{
+							int populationMinSize = 20;
+							int populationMaxSize = 40;
+							float mutateFactor = 0.1;
+							int limitOfWorstSolution = 1500;
+							string input;
+
+							cout << "population startup size (" << populationMinSize << "): ";
+
+							getline(cin, input);
+
+							if (input.empty())
+							{
+								stringstream geek(input);
+								geek >> populationMinSize;
+							}
+
+							cout << "population final size (" << populationMaxSize << "): ";
+
+							getline(cin, input);
+
+							if (input.empty())
+							{
+								stringstream geek(input);
+								geek >> populationMaxSize;
+							}
+
+							cout << "mutate factor (" << mutateFactor << "): ";
+
+							getline(cin, input);
+
+							if (input.empty())
+							{
+								stringstream geek(input);
+								geek >> mutateFactor;
+							}
+
+							cout << "number of worst solution (" << limitOfWorstSolution << "): ";
+
+							getline(cin, input);
+
+							if (input.empty())
+							{
+								stringstream geek(input);
+								geek >> mutateFactor;
+							}
+
+
+							auto start = high_resolution_clock::now();
+							genetic(array, width, false, populationMinSize, populationMaxSize, mutateFactor, limitOfWorstSolution);
+							auto stop = high_resolution_clock::now();
+							auto duration = duration_cast<milliseconds>(stop - start);
+							cout << "Time: " << duration.count() << " milliseconds" << endl;
+							break;
+						}
+						else
+						{
+							cout << "ERROR: No load graph.\n";
+						}
+
+						break;
+					}
+					case '2':
+					{
+						const int numberOfFiles = 7;
+						string files[numberOfFiles] = { "6-80.txt",
+														"17-2085.txt",
+														"29-2020.txt",
+														"47-1776.txt",
+														"64-1839.txt",
+														"70-1950.txt",
+														"170-2755.txt" };
+
+						int optimalSolution[numberOfFiles] = { 80, 2085, 2020, 1776, 1839, 1950, 2755 };
+
+						cout << std::setw(PRINT_WIDTH + DAW) << "width"
+							<< std::setw(PRINT_WIDTH + DAW) << "minSiz"
+							<< std::setw(PRINT_WIDTH + DAW) << "maxSiz"
+							<< std::setw(PRINT_WIDTH + DAW) << "mutFac"
+							<< std::setw(PRINT_WIDTH + DAW) << "worstL"
+							<< std::setw(PRINT_WIDTH + DAW) << "popCon"
+							<< std::setw(PRINT_WIDTH + DAW) << "cost"
+							<< std::setw(PRINT_WIDTH + DAW) << "optSolu"
+							<< std::setw(PRINT_WIDTH + DAW) << "time"
+							<< std::setw(PRINT_WIDTH + DAW) << "blad" << endl;
+
+						for (int i = 0; i < numberOfFiles; i++) // Graph size.
+						{
+							int returnValue = readGrapgFromFile(files[i], array, width);
+
+							if (returnValue == -1)
+							{
+								cout << "ERROR: Cannot read graph.\n";
+								return -1;
+							}
+
+							int populationMinSize = 20;
+							int populationMaxSize = 40;
+							float mutateFactor = 0.1;
+							int limitOfWorstSolution = 1500;
+
+							for (mutateFactor = 0.1; mutateFactor <= 0.5; mutateFactor *= 2)
+							{
+								for (limitOfWorstSolution = 750; limitOfWorstSolution <= 12000; limitOfWorstSolution *= 2)
+								{
+									int averageTime = 0;
+									int averagePopulationCounter = 0;
+									int averageSolution = 0;
+
+									for (int i = 0; i < NUMBER_OF_TEST; i++)
+									{
+										int popCounter;
+										auto start = high_resolution_clock::now();
+										averageSolution += genetic(array, width, true, populationMinSize, populationMinSize * 2,
+											mutateFactor, limitOfWorstSolution, &popCounter);
+										auto stop = high_resolution_clock::now();
+										auto duration = duration_cast<milliseconds>(stop - start);
+
+										averageTime += duration.count();
+										averagePopulationCounter += popCounter;
+									}
+
+
+									averageTime /= NUMBER_OF_TEST;
+									averagePopulationCounter /= NUMBER_OF_TEST;
+									averageSolution /= NUMBER_OF_TEST;
+
+									int other = 100 * ((float)averageSolution - (float)optimalSolution[i]) / (float)optimalSolution[i];
+
+									std::cout << std::setw(PRINT_WIDTH) << width << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << populationMinSize << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << populationMaxSize << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << std::setprecision(1) << std::fixed << mutateFactor << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << limitOfWorstSolution << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << averagePopulationCounter << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << averageSolution << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << optimalSolution[i] << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << averageTime << "; ";
+
+									std::cout << std::setw(PRINT_WIDTH) << other << "; ";
+
+									std::cout << std::endl;
+								}
+							}
+
+						}
+						break;
+					}
+				}
 				break;
 			}
 		}
@@ -136,7 +479,7 @@ int readGrapgFromFile(std::string path, int**& array, int& width)
 
 	file >> width;
 
-	std::cout << "Number of cities: " << width << "\n";
+	//std::cout << "Number of cities: " << width << "\n";
 
 	array = new int* [width];
 
@@ -151,6 +494,7 @@ int readGrapgFromFile(std::string path, int**& array, int& width)
 	int collumn = 0;
 	int value;
 
+	int values = 0;
 	while (file >> value)
 	{
 		array[row][collumn] = value;
@@ -167,7 +511,7 @@ int readGrapgFromFile(std::string path, int**& array, int& width)
 				break;
 			}
 		}
-		
+		values++;
 	}
 
 	file.close();
@@ -181,7 +525,6 @@ void printArray(int** array, int width)
 	if (array == nullptr)
 	{
 		std::cout << "printArray(): ERROR: array is nulptr.";
-
 		return;
 	}
 

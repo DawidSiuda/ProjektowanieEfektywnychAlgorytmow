@@ -24,13 +24,18 @@
     <None Include="burma14.atsp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Annealing.cpp" />
     <ClCompile Include="BrutalForce.cpp" />
     <ClCompile Include="DynamicPrograming.cpp" />
+    <ClCompile Include="Genetic.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Annealing.h" />
     <ClInclude Include="BrutalForce.h" />
     <ClInclude Include="DynamicPrograming.h" />
+    <ClInclude Include="Genetic.h" />
+    <ClInclude Include="MyVector.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

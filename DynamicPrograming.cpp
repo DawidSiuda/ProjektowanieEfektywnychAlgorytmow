@@ -17,7 +17,7 @@ int g(int vertex, unsigned bitVector, int** array, int width);
 static int** lookupCosts = nullptr;
 static int** lookupPath = nullptr;
 
-int dynamicPrograming(int** array, int width)
+int dynamicPrograming(int** array, int width, bool test)
 {
 	lookupPath = createArray(width);
 	lookupCosts = createArray(width);
@@ -50,19 +50,31 @@ int dynamicPrograming(int** array, int width)
 
 	int sum = 0;
 
-	cout << "Dynamic Programing:\n\t";
-
-	for (int i = 0; i < width; i++) 
+	if (test == false)
 	{
-		cout << path[i] << " -> ";
-		sum += array[path[i]][path[i + 1]];
+		cout << "Dynamic Programing:\n\t";
+
+		for (int i = 0; i < width; i++)
+		{
+			cout << path[i] << " -> ";
+			sum += array[path[i]][path[i + 1]];
+		}
+		cout << path[width];
+		cout << endl;
+
+		cout << "\tSum: " << sum << endl << endl;
+
+		//cout << sum << ";"; // to del
 	}
-	cout << path[width];
-	cout << endl;
+	else
+	{
+		for (int i = 0; i < width; i++)
+		{
+			sum += array[path[i]][path[i + 1]];
+		}
+	}
 
-	cout << "\tSum: " << sum << endl << endl;
-
-	return 0;
+	return sum;
 }
 
 int g(int vertex, unsigned bitVector, int** array, int width) 
